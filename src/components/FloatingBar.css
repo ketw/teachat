@@ -1,0 +1,181 @@
+/* Floating icon bar — centered top, pill shape over the blue bg */
+.fbar {
+  position: fixed;
+  top: calc(var(--frame-size) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+
+  display: flex;
+  align-items: center;
+  gap: 2px;
+
+  background: rgba(0, 0, 180, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  padding: 5px 8px;
+
+  /* no border-radius on main frame — but bar itself gets slight rounding */
+  border-radius: 2px;
+}
+
+.fbar-brand {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
+.fbar-logo {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.fbar-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+/* icon buttons */
+.fbar-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  color: var(--hw-fg-50);
+  transition: color 0.12s, background 0.12s, border-color 0.12s;
+  flex-shrink: 0;
+}
+
+.fbar-btn:hover {
+  color: var(--hw-fg);
+  background: var(--hw-fg-08);
+  border-color: var(--border);
+}
+
+/* active = window is open — accent underline */
+.fbar-btn.active {
+  color: var(--hw-fg);
+  background: var(--hw-fg-15);
+  border-color: var(--hw-fg-30);
+}
+
+/* yellow accent dot on active button bottom */
+.fbar-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: var(--hw-accent);
+  border-radius: 50%;
+}
+
+/* unread badge */
+.fbar-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: var(--hw-accent);
+  color: var(--hw-bg);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 800;
+  min-width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* tooltip — appears on hover */
+.fbar-tooltip {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--hw-paper);
+  color: var(--hw-bg);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s;
+  z-index: 600;
+}
+
+/* tooltip arrow */
+.fbar-tooltip::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 4px solid var(--hw-paper);
+}
+
+.fbar-btn:hover .fbar-tooltip,
+.fbar-brand:hover .fbar-tooltip,
+.fbar-user:hover .fbar-tooltip {
+  opacity: 1;
+}
+
+.fbar-tooltip--left {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+.fbar-tooltip--left::before {
+  left: auto;
+  right: 10px;
+  transform: none;
+}
+
+/* user avatar */
+.fbar-user {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
+.fbar-user-initial {
+  width: 28px;
+  height: 28px;
+  background: var(--hw-accent);
+  color: var(--hw-bg);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1px;
+}

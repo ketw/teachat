@@ -1,0 +1,81 @@
+/* Floating window — paper white, sharp corners, Game Bar style */
+.fw {
+  position: fixed;
+  background: var(--hw-paper);
+  color: var(--hw-bg);
+  font-family: var(--font-mono);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 12px 60px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.3);
+  /* noise overlay */
+  isolation: isolate;
+  min-height: 120px;
+  max-height: calc(100vh - var(--frame-size) * 2 - 80px);
+}
+
+/* noise on every window — exact hw-noise */
+.fw::after {
+  content: '';
+  background-image: var(--hw-noise-bg);
+  background-size: var(--hw-noise-tile) var(--hw-noise-tile);
+  mix-blend-mode: color-burn;
+  opacity: 0.16;
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+}
+
+/* title bar — drag handle */
+.fw-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 9px;
+  background: var(--hw-paper);
+  border-bottom: 1px solid rgba(0, 0, 242, 0.1);
+  cursor: grab;
+  user-select: none;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.fw-titlebar:active { cursor: grabbing; }
+
+.fw-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--hw-bg);
+}
+
+.fw-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: rgba(0, 0, 242, 0.35);
+  padding: 2px 5px;
+  letter-spacing: 0.06em;
+  transition: color 0.1s, background 0.1s;
+  line-height: 1;
+  font-family: var(--font-mono);
+}
+
+.fw-close:hover {
+  color: var(--hw-bg);
+  background: rgba(0, 0, 242, 0.07);
+}
+
+.fw-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  z-index: 1;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 242, 0.12) transparent;
+}
