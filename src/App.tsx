@@ -1,102 +1,106 @@
-import React, { useState, useEffect } from 'react';
-import SpaceBar from './components/layout/SpaceBar';
-import ChannelSidebar from './components/layout/ChannelSidebar';
-import DMSidebar from './components/layout/DMSidebar';
-import ChatView from './components/chat/ChatView';
-import DMView from './components/chat/DMView';
-import WelcomeView from './components/chat/WelcomeView';
-import { useStore, subscribe } from './store/appStore';
-import { getSpaces, getDMs } from './store/appStore';
+import React from 'react';
+import {
+  useStore,
+  toggleWindow,
+  openGroupChat,
+  openDMChat,
+  openOrCreateDM,
+} from './store/appStore';
+import FloatingBar from './components/FloatingBar';
+import FloatingWindow from './components/FloatingWindow';
+import ChatWindow from './components/ChatWindow';
+import HomeView from './components/HomeView';
+import Onboarding from './components/Onboarding';
+import ConnectPanel from './components/panels/ConnectPanel';
+import GroupsPanel from './components/panels/GroupsPanel';
+import ChatPanel from './components/panels/ChatPanel';
+import SettingsPanel from './components/panels/SettingsPanel';
+import type { PanelId } from './types';
 import './App.css';
 
-type View =
-  | { type: 'welcome' }
-  | { type: 'space'; spaceId: string; channelId: string | null }
-  | { type: 'dms'; dmId: string | null };
+const WINDOW_TITLES: Record<PanelId, string> = {
+  connect:    'Connect',
+  groups:     'Groups',
+  chat:       'Messages',
+  chatwindow: 'Chat',
+  settings:   'Settings',
+};
 
 export default function App() {
-  const { spaces, dms, users, currentUser } = useStore();
-  const [view, setView] = useState<View>({ type: 'welcome' });
+  const state = useStore();
+  const [claimed] = React.useState(true); // flip to false to test onboarding
 
-  // Select first channel of a space by default
-  function openSpace(spaceId: string) {
-    const space = spaces.find(s => s.id === spaceId);
-    const firstChannel = space?.sections[0]?.channels[0];
-    setView({ type: 'space', spaceId, channelId: firstChannel?.id ?? null });
+  if (!claimed) {
+    return <Onboarding onClaim={() => {}} />;
   }
 
-  function openDMs() {
-    setView({ type: 'dms', dmId: null });
-  }
+  const { me, users, groups, dms, openWindows, chatView } = state;
+  if (!me) return null;
 
-  function openChannel(channelId: string) {
-    if (view.type === 'space') {
-      setView({ ...view, channelId });
+  const dmUnread    = dms.reduce((a, d) => a + d.unread, 0);
+  const groupUnread = groups.flatMap(g => g.channels).reduce((a, c) => a + c.unread, 0);
+  const totalUnread = dmUnread + groupUnread;
+
+  function handleOpenDM(dmId: string) { openDMChat(dmId); }
+  function handleOpenGroup(groupId: string) { openGroupChat(groupId); }
+
+  function renderWindowContent(id: PanelId) {
+    switch (id) {
+      case 'connect':
+        return <ConnectPanel onOpenDM={handleOpenDM} />;
+      case 'groups':
+        return <GroupsPanel onOpen={handleOpenGroup} />;
+      case 'chat':
+        return <ChatPanel onOpenDM={handleOpenDM} onOpenGroup={handleOpenGroup} />;
+      case 'chatwindow':
+        return (
+          <ChatWindow
+            chatView={chatView}
+            users={users}
+            me={me}
+            groups={groups}
+            dms={dms}
+          />
+        );
+      case 'settings':
+        return <SettingsPanel />;
     }
   }
 
-  function openDM(dmId: string) {
-    setView({ type: 'dms', dmId });
-  }
-
-  // Total DM unread
-  const dmUnread = dms.reduce((acc, dm) => acc + (dm.unread ?? 0), 0);
-
-  // Resolve current channel / dm
-  const activeSpace = view.type === 'space' ? spaces.find(s => s.id === view.spaceId) : null;
-  const activeChannel = activeSpace && view.type === 'space' && view.channelId
-    ? activeSpace.sections.flatMap(s => s.channels).find(c => c.id === view.channelId)
-    : null;
-  const activeDM = view.type === 'dms' && view.dmId
-    ? dms.find(d => d.id === view.dmId)
-    : null;
-
   return (
     <div className="app">
-      <SpaceBar
-        spaces={spaces}
-        selectedSpaceId={view.type === 'space' ? view.spaceId : null}
-        onSelectSpace={id => id ? openSpace(id) : openDMs()}
-        onOpenDMs={openDMs}
-        dmUnread={dmUnread}
+      {/* Hermes hw-frame — fixed thick border all around */}
+      <div className="hw-frame" aria-hidden />
+
+      {/* Full-bleed background — hero art, noise, home content */}
+      <div className="app-bg">
+        <img className="app-hero-art" src="/img/hero-art.jpg" alt="" aria-hidden />
+        <HomeView
+          username={me.username}
+          userId={me.id}
+          groupCount={groups.length}
+          dmUnread={dmUnread}
+        />
+      </div>
+
+      {/* Floating icon bar */}
+      <FloatingBar
+        openWindows={openWindows}
+        onToggle={toggleWindow}
+        username={me.username}
+        totalUnread={totalUnread}
       />
 
-      {/* Sidebar */}
-      {view.type === 'space' && activeSpace ? (
-        <ChannelSidebar
-          space={activeSpace}
-          selectedChannelId={view.type === 'space' ? view.channelId : null}
-          onSelectChannel={openChannel}
-          currentUser={currentUser}
-          users={users}
-        />
-      ) : view.type === 'dms' ? (
-        <DMSidebar
-          dms={dms}
-          selectedDMId={view.dmId ?? null}
-          onSelectDM={openDM}
-          users={users}
-          currentUser={currentUser}
-        />
-      ) : null}
-
-      {/* Main content */}
-      {view.type === 'space' && activeSpace && activeChannel ? (
-        <ChatView
-          spaceId={activeSpace.id}
-          channel={activeChannel}
-          users={users}
-          currentUser={currentUser}
-        />
-      ) : view.type === 'dms' && activeDM ? (
-        <DMView
-          dm={activeDM}
-          users={users}
-          currentUser={currentUser}
-        />
-      ) : (
-        <WelcomeView />
-      )}
+      {/* Floating windows */}
+      {openWindows.map(win => (
+        <FloatingWindow
+          key={win.id}
+          win={win}
+          title={WINDOW_TITLES[win.id]}
+        >
+          {renderWindowContent(win.id)}
+        </FloatingWindow>
+      ))}
     </div>
   );
 }
