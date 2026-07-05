@@ -204,13 +204,13 @@ function applyTheme(t: Theme) {
   r.setProperty('--r-input',       `${eff(R.inputs)}px`);
   r.setProperty('--r-bar',         `${eff(R.bar)}px`);
 
-  // inner toggle gates whether inner radius is applied at all
+  // inner toggle gates whether inner radius is applied — fully independent
   const innerVal = R.frameInnerEnabled ? eff(R.frameInner) : 0;
   r.setProperty('--r-frame-inner', `${innerVal}px`);
 
-  // outer toggle gates whether outer radius is applied at all
-  // outer value = inner value + frame thickness (so curves are concentric)
-  const outerVal = R.frameOuter ? innerVal + t.frameSize : 0;
+  // outer toggle gates whether outer radius is applied — fully independent
+  // outer uses its OWN resolved value, NOT innerVal, so toggling inner never affects outer
+  const outerVal = R.frameOuter ? eff(R.frameInner) + t.frameSize : 0;
   r.setProperty('--r-frame-outer', `${outerVal}px`);
 
   // --border-radius alias for windows
