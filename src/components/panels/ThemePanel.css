@@ -142,7 +142,7 @@
   color: var(--hw-bg); opacity: 0.55;
   cursor: pointer; transition: opacity 0.1s, background 0.1s;
   font-family: var(--font-mono);
-  border-radius: var(--border-radius);
+  border-radius: var(--r-button);
 }
 .tp-preset-btn:hover {
   background: var(--hw-bg); color: var(--hw-paper);
@@ -158,7 +158,7 @@
   border: none; font-size: 10px; letter-spacing: 0.12em;
   cursor: pointer; transition: opacity 0.1s;
   font-family: var(--font-mono);
-  border-radius: var(--border-radius);
+  border-radius: var(--r-button);
 }
 .tp-upload-btn:hover { opacity: 0.8; }
 
@@ -169,7 +169,7 @@
   font-size: 10px; letter-spacing: 0.12em;
   cursor: pointer; transition: background 0.1s;
   font-family: var(--font-mono);
-  border-radius: var(--border-radius);
+  border-radius: var(--r-button);
 }
 .tp-clear-btn:hover { background: rgba(200,0,0,0.08); }
 
@@ -184,7 +184,7 @@
   background: var(--hw-bg); color: var(--hw-paper); border: none;
   font-size: 10px; letter-spacing: 0.12em;
   cursor: pointer; transition: opacity 0.1s;
-  font-family: var(--font-mono); border-radius: var(--border-radius);
+  font-family: var(--font-mono); border-radius: var(--r-button);
 }
 .tp-export-btn:hover { opacity: 0.8; }
 
@@ -194,7 +194,7 @@
   font-size: 10px; letter-spacing: 0.12em;
   color: var(--hw-bg); opacity: 0.45;
   cursor: pointer; transition: opacity 0.1s, background 0.1s;
-  font-family: var(--font-mono); border-radius: var(--border-radius);
+  font-family: var(--font-mono); border-radius: var(--r-button);
 }
 .tp-reset-btn:hover { background: rgba(200,0,0,0.07); color: rgba(160,0,0,0.9); opacity: 1; border-color: rgba(200,0,0,0.3); }
 
@@ -222,6 +222,74 @@
   font-size: 10px; letter-spacing: 0.12em;
   color: var(--hw-bg); opacity: 0.5;
   cursor: pointer; transition: opacity 0.1s, background 0.1s;
-  font-family: var(--font-mono); border-radius: var(--border-radius);
+  font-family: var(--font-mono); border-radius: var(--r-button);
 }
 .tp-import-btn:hover { background: var(--border-paper); opacity: 1; }
+
+
+/* ── Corner Radii section ────────────────────────────── */
+.tp-radii-global {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tp-radii-global-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--hw-bg);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tp-radii-global-slider {
+  flex: 1;
+}
+
+.tp-check {
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
+  accent-color: var(--hw-bg);
+  flex-shrink: 0;
+}
+
+.tp-radii-note {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--hw-bg);
+  opacity: 0.35;
+  line-height: 1.5;
+  padding: 0 2px;
+}
+
+.tp-radii-check-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 4px 0;
+  border-top: 1px solid var(--border-paper);
+  border-bottom: 1px solid var(--border-paper);
+  margin: 4px 0;
+}
+
+.tp-check-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--hw-bg);
+  cursor: pointer;
+}
+
+/* greyed-out state when global override is active */
+.tp-disabled {
+  opacity: 0.38;
+  pointer-events: none;
+  user-select: none;
+}

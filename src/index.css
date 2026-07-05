@@ -23,6 +23,13 @@
 
   /* ── Border radius (overridden by theme) ────── */
   --border-radius: 4px;
+  --r-window:      4px;
+  --r-panel:       4px;
+  --r-button:      4px;
+  --r-input:       4px;
+  --r-bar:         4px;
+  --r-frame-inner: 4px;
+  --r-frame-outer: 0px;
 
   /* ── Frame (overridden by theme) ────────────── */
   --frame-size:   10px;

@@ -30,7 +30,7 @@
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  border-radius: var(--border-radius);
+  border-radius: var(--r-panel);
   border: 1px solid var(--border-paper);
 }
 
@@ -81,3 +81,4 @@
   letter-spacing: 0.14em;
   color: var(--hw-fg-15);
 }
+

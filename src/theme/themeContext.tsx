@@ -16,8 +16,20 @@ export interface Theme {
   paperColor:     string;       // window/panel background
 
   // Borders
-  borderOpacity:  number;       // 0–1 (applied to --border)
-  borderRadius:   number;       // px — global corner rounding (0 = sharp)
+  borderOpacity:  number;
+
+  // Corner radii — granular per-element control
+  radii: {
+    globalEnabled:    boolean;
+    globalValue:      number;
+    frameInner:       number;
+    frameOuter:       boolean;
+    windows:          number;
+    panels:           number;
+    buttons:          number;
+    inputs:           number;
+    bar:              number;
+  };
 
   // Frame (outer margin border)
   frameSize:      number;       // px
@@ -53,7 +65,17 @@ export const DEFAULT_THEME: Theme = {
   paperColor:           '#2f2b2c',   // warm charcoal
 
   borderOpacity:        0.22,
-  borderRadius:         4,
+  radii: {
+    globalEnabled: false,
+    globalValue:   4,
+    frameInner:    4,
+    frameOuter:    false,
+    windows:       4,
+    panels:        4,
+    buttons:       4,
+    inputs:        4,
+    bar:           4,
+  },
 
   frameSize:            10,
   frameColor:           '',
@@ -71,52 +93,28 @@ export const DEFAULT_THEME: Theme = {
 };
 
 const PRESETS: Record<string, Partial<Theme>> = {
-  'Nordic Hearth': {},  // all defaults — the base theme
+  'Nordic Hearth': {},  // all defaults
   'Dusk': {
-    bgColor:              '#1c1b22',
-    fgColor:              '#c9c5d3',
-    accentColor:          '#9d8cff',
-    paperColor:           '#252330',
-    borderOpacity:        0.22,
-    borderRadius:         4,
-    frameSize:            12,
-    frameColor:           '',
-    windowTitlebarHeight: 32,
-    windowFocusedBorder:  '',
-    windowUnfocusedOp:    0.85,
-    barScale:             1,
-    noiseOpacity:         0.06,
+    bgColor: '#1c1b22', fgColor: '#c9c5d3', accentColor: '#9d8cff',
+    paperColor: '#252330', borderOpacity: 0.22,
+    frameSize: 12, frameColor: '', windowTitlebarHeight: 32,
+    windowFocusedBorder: '', windowUnfocusedOp: 0.85,
+    barScale: 1, noiseOpacity: 0.06,
   },
   'Ket': {
-    bgMode:               'color',
-    bgColor:              '#302b3f',
-    fgColor:              '#d2afb4',
-    accentColor:          '#d2afb4',
-    paperColor:           '#302b3f',
-    borderOpacity:        0.55,
-    borderRadius:         0,
-    frameSize:            4,
-    frameColor:           '#d2afb4',
-    windowTitlebarHeight: 24,
-    windowFocusedBorder:  '',        // auto-derives from accent (#d2afb4)
-    windowUnfocusedOp:    1,
-    barScale:             1.03,
-    noiseOpacity:         0.09,
+    bgColor: '#302b3f', fgColor: '#d2afb4', accentColor: '#d2afb4',
+    paperColor: '#302b3f', borderOpacity: 0.55,
+    radii: { globalEnabled: false, globalValue: 0, frameInner: 0, frameOuter: false, windows: 0, panels: 0, buttons: 0, inputs: 0, bar: 0 },
+    frameSize: 4, frameColor: '#d2afb4', windowTitlebarHeight: 24,
+    windowFocusedBorder: '', windowUnfocusedOp: 1,
+    barScale: 1.03, noiseOpacity: 0.09,
   },
   'Hermes Blue': {
-    bgColor:              '#0000f2',
-    fgColor:              '#f5f5f5',
-    accentColor:          '#edff45',
-    paperColor:           '#ffffff',
-    borderOpacity:        0.14,
-    borderRadius:         0,
-    frameSize:            22,
-    frameColor:           '',
-    windowTitlebarHeight: 38,
-    windowFocusedBorder:  '',
-    windowUnfocusedOp:    1,
-    barScale:             1,
-    noiseOpacity:         0.18,
+    bgColor: '#0000f2', fgColor: '#f5f5f5', accentColor: '#edff45',
+    paperColor: '#ffffff', borderOpacity: 0.14,
+    radii: { globalEnabled: false, globalValue: 0, frameInner: 0, frameOuter: false, windows: 0, panels: 0, buttons: 0, inputs: 0, bar: 0 },
+    frameSize: 22, frameColor: '', windowTitlebarHeight: 38,
+    windowFocusedBorder: '', windowUnfocusedOp: 1, barScale: 1, noiseOpacity: 0.18,
   },
   'Dark Slate': {
     bgColor: '#0f1117', fgColor: '#e8e8e8', accentColor: '#7c6af7',
@@ -127,6 +125,7 @@ const PRESETS: Record<string, Partial<Theme>> = {
     bgColor: '#030f03', fgColor: '#00ff41', accentColor: '#00ff41',
     paperColor: '#071007', borderOpacity: 0.25,
     windowFocusedBorder: 'rgba(0,255,65,0.4)',
+    radii: { globalEnabled: false, globalValue: 0, frameInner: 0, frameOuter: false, windows: 0, panels: 0, buttons: 0, inputs: 0, bar: 0 },
   },
   'Warm Cream': {
     bgColor: '#1a1208', fgColor: '#f0e6c8', accentColor: '#f5a623',
@@ -139,34 +138,17 @@ const PRESETS: Record<string, Partial<Theme>> = {
     windowFocusedBorder: 'rgba(191,95,255,0.55)',
   },
   'Twilight Spruce': {
-    bgColor:              '#1e2522',
-    fgColor:              '#e2e8f0',
-    accentColor:          '#dda15e',
-    paperColor:           '#2a332f',
-    borderOpacity:        0.2,
-    borderRadius:         4,
-    frameSize:            10,
-    frameColor:           '',
-    windowTitlebarHeight: 32,
-    windowFocusedBorder:  '',
-    windowUnfocusedOp:    0.88,
-    barScale:             1,
-    noiseOpacity:         0.07,
+    bgColor: '#1e2522', fgColor: '#e2e8f0', accentColor: '#dda15e',
+    paperColor: '#2a332f', borderOpacity: 0.2,
+    frameSize: 10, frameColor: '', windowTitlebarHeight: 32,
+    windowFocusedBorder: '', windowUnfocusedOp: 0.88, barScale: 1, noiseOpacity: 0.07,
   },
   'Velvet Eclipse': {
-    bgColor:              '#1f1f2e',
-    fgColor:              '#eaeaea',
-    accentColor:          '#94d2bd',
-    paperColor:           '#2a2b3d',
-    borderOpacity:        0.2,
-    borderRadius:         6,
-    frameSize:            10,
-    frameColor:           '',
-    windowTitlebarHeight: 32,
-    windowFocusedBorder:  '',
-    windowUnfocusedOp:    0.88,
-    barScale:             1,
-    noiseOpacity:         0.05,
+    bgColor: '#1f1f2e', fgColor: '#eaeaea', accentColor: '#94d2bd',
+    paperColor: '#2a2b3d', borderOpacity: 0.2,
+    radii: { globalEnabled: false, globalValue: 6, frameInner: 6, frameOuter: false, windows: 6, panels: 6, buttons: 6, inputs: 6, bar: 6 },
+    frameSize: 10, frameColor: '', windowTitlebarHeight: 32,
+    windowFocusedBorder: '', windowUnfocusedOp: 0.88, barScale: 1, noiseOpacity: 0.05,
   },
 };
 
@@ -209,11 +191,31 @@ function applyTheme(t: Theme) {
 
   r.setProperty('--border',          fgDerived(t.fgColor, t.borderOpacity));
   r.setProperty('--border-paper',    paperDerived(t.paperColor, t.bgColor, t.borderOpacity));
-  r.setProperty('--border-radius',   `${t.borderRadius}px`);
+
+  // ── Corner radii — resolve effective values ────────────────
+  const R = t.radii;
+  const eff = (v: number) => R.globalEnabled ? R.globalValue : v;
+
+  r.setProperty('--r-window',      `${eff(R.windows)}px`);
+  r.setProperty('--r-panel',       `${eff(R.panels)}px`);
+  r.setProperty('--r-button',      `${eff(R.buttons)}px`);
+  r.setProperty('--r-input',       `${eff(R.inputs)}px`);
+  r.setProperty('--r-bar',         `${eff(R.bar)}px`);
+  r.setProperty('--r-frame-inner', `${eff(R.frameInner)}px`);
+  // outer frame: only apply if frameOuter enabled (or global override)
+  const outerR = R.globalEnabled
+    ? R.globalValue + t.frameSize
+    : R.frameOuter
+      ? eff(R.frameInner) + t.frameSize
+      : '0';
+  r.setProperty('--r-frame-outer', typeof outerR === 'number' ? `${outerR}px` : outerR);
+
+  // keep --border-radius as alias for windows (for components that use it)
+  r.setProperty('--border-radius',  `${eff(R.windows)}px`);
 
   r.setProperty('--frame-size',      `${t.frameSize}px`);
   r.setProperty('--frame-color',     effectiveFrame);
-  r.setProperty('--frame-radius',    `${t.borderRadius}px`);
+  r.setProperty('--frame-radius',    `${t.radii.globalEnabled ? t.radii.globalValue : t.radii.frameInner}px`);
 
   r.setProperty('--win-titlebar-h',  `${t.windowTitlebarHeight}px`);
   // focused border — if empty or not set, derive from accent color

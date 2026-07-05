@@ -32,7 +32,7 @@
   padding: 8px 10px; background: none; border: 1px solid transparent;
   cursor: pointer; text-align: left; font-family: var(--font-mono); color: var(--hw-bg);
   transition: background 0.1s, border-color 0.1s; overflow: hidden; width: 100%;
-  border-radius: var(--border-radius);
+  border-radius: var(--r-panel);
 }
 .chp-item:hover { background: var(--border-paper); border-color: var(--border-paper); }
 .chp-item.unread { background: var(--border-paper); }
@@ -70,7 +70,7 @@
   padding: 7px 10px; background: var(--border-paper); border: 1px solid var(--border-paper);
   cursor: pointer; text-align: left; font-family: var(--font-mono); color: var(--hw-bg);
   transition: opacity 0.1s; overflow: hidden; width: 100%;
-  border-radius: var(--border-radius);
+  border-radius: var(--r-panel);
 }
 .chp-group-hd:hover { opacity: 0.75; }
 
@@ -89,3 +89,4 @@
 .chp-ch.unread { opacity: 1; font-weight: 700; }
 .chp-ch-icon { display: flex; flex-shrink: 0; }
 .chp-ch-name { font-size: 11px; flex: 1; letter-spacing: 0.06em; }
+

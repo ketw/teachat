@@ -16,7 +16,7 @@
   display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
   background: var(--hw-bg); color: var(--hw-fg); border: none;
   padding: 8px 14px; font-size: 10px; letter-spacing: 0.14em; cursor: pointer;
-  transition: opacity 0.12s; border-radius: var(--border-radius);
+  transition: opacity 0.12s; border-radius: var(--r-button);
 }
 .gp-create-btn:hover { opacity: 0.8; }
 
@@ -29,7 +29,7 @@
   padding: 9px 10px; background: none; border: 1px solid transparent;
   cursor: pointer; text-align: left; font-family: var(--font-mono); color: var(--hw-bg);
   transition: background 0.1s, border-color 0.1s; overflow: hidden; width: 100%;
-  border-radius: var(--border-radius);
+  border-radius: var(--r-button);
 }
 .gp-item:hover { background: var(--border-paper); border-color: var(--border-paper); }
 
@@ -54,7 +54,7 @@
   background: var(--hw-paper); border: 1px solid var(--border-paper); outline: none;
   font-family: var(--font-mono); font-size: 12px; padding: 8px 10px;
   color: var(--hw-bg); letter-spacing: 0.04em; text-transform: none;
-  transition: border-color 0.12s; border-radius: var(--border-radius);
+  transition: border-color 0.12s; border-radius: var(--r-button);
 }
 .gp-input:focus { border-color: var(--hw-bg); }
 .gp-err { font-size: 10px; color: #cc2222; letter-spacing: 0.08em; }
@@ -62,13 +62,14 @@
 .gp-cancel {
   flex: 1; padding: 8px; background: none; border: 1px solid var(--border-paper);
   font-size: 10px; letter-spacing: 0.12em; cursor: pointer; color: var(--hw-bg); opacity: 0.45;
-  transition: background 0.1s, opacity 0.1s; border-radius: var(--border-radius);
+  transition: background 0.1s, opacity 0.1s; border-radius: var(--r-button);
 }
 .gp-cancel:hover { background: var(--border-paper); opacity: 1; }
 .gp-submit {
   flex: 2; padding: 8px; background: var(--hw-bg); color: var(--hw-fg); border: none;
   font-size: 10px; letter-spacing: 0.12em; cursor: pointer;
-  transition: opacity 0.12s; border-radius: var(--border-radius);
+  transition: opacity 0.12s; border-radius: var(--r-button);
 }
 .gp-submit:hover:not(:disabled) { opacity: 0.8; }
 .gp-submit:disabled { opacity: 0.35; cursor: not-allowed; }
+

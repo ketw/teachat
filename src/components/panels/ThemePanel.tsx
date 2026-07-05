@@ -195,7 +195,7 @@ export default function ThemePanel() {
         </Row>
       </Section>
 
-      {/* ── Frame / Border ──────────────────────────────────── */}
+      {/* ── Frame & Borders ─────────────────────────────────── */}
       <Section title="Frame & Borders">
         <Row label="Frame Size">
           <Slider value={theme.frameSize} min={0} max={60} unit="px"
@@ -205,10 +205,79 @@ export default function ThemePanel() {
           <Slider value={Math.round(theme.borderOpacity * 100)} min={0} max={60} unit="%"
             onChange={v => set({ borderOpacity: v / 100 })} />
         </Row>
-        <Row label="Corner Radius">
-          <Slider value={theme.borderRadius} min={0} max={20} unit="px"
-            onChange={v => set({ borderRadius: v })} />
-        </Row>
+      </Section>
+
+      {/* ── Corner Radii ─────────────────────────────────────── */}
+      <Section title="Corner Radii">
+        {/* Global override toggle */}
+        <div className="tp-radii-global">
+          <label className="tp-radii-global-label hw-mono">
+            <input
+              type="checkbox"
+              className="tp-check"
+              checked={theme.radii.globalEnabled}
+              onChange={e => set({ radii: { ...theme.radii, globalEnabled: e.target.checked } })}
+            />
+            Global Override
+          </label>
+          <div className={`tp-radii-global-slider ${!theme.radii.globalEnabled ? 'tp-disabled' : ''}`}>
+            <Slider
+              value={theme.radii.globalValue}
+              min={0} max={32} unit="px"
+              onChange={v => set({ radii: { ...theme.radii, globalValue: v } })}
+            />
+          </div>
+        </div>
+        <p className="tp-radii-note hw-mono">
+          {theme.radii.globalEnabled
+            ? 'All values below are overridden — stored values preserved'
+            : 'Set per-element values below'}
+        </p>
+
+        <div className={theme.radii.globalEnabled ? 'tp-disabled' : ''}>
+          {/* Frame inner */}
+          <Row label="Frame Inner">
+            <Slider value={theme.radii.frameInner} min={0} max={32} unit="px"
+              onChange={v => set({ radii: { ...theme.radii, frameInner: v } })} />
+          </Row>
+
+          {/* Frame outer — checkbox to enable */}
+          <div className="tp-radii-check-row">
+            <label className="tp-check-label hw-mono">
+              <input
+                type="checkbox"
+                className="tp-check"
+                checked={theme.radii.frameOuter}
+                onChange={e => set({ radii: { ...theme.radii, frameOuter: e.target.checked } })}
+              />
+              Frame Outer Corners
+            </label>
+            <span className="tp-radii-note hw-mono">
+              {theme.radii.frameOuter ? 'outer = inner + frame size' : 'Sharp outer corners'}
+            </span>
+          </div>
+
+          <Row label="Windows">
+            <Slider value={theme.radii.windows} min={0} max={32} unit="px"
+              onChange={v => set({ radii: { ...theme.radii, windows: v } })} />
+          </Row>
+          <Row label="Panels / Cards">
+            <Slider value={theme.radii.panels} min={0} max={32} unit="px"
+              onChange={v => set({ radii: { ...theme.radii, panels: v } })} />
+          </Row>
+          <Row label="Buttons">
+            <Slider value={theme.radii.buttons} min={0} max={32} unit="px"
+              onChange={v => set({ radii: { ...theme.radii, buttons: v } })} />
+          </Row>
+          <Row label="Inputs">
+            <Slider value={theme.radii.inputs} min={0} max={32} unit="px"
+              onChange={v => set({ radii: { ...theme.radii, inputs: v } })} />
+          </Row>
+          <Row label="Floating Bar">
+            <Slider value={theme.radii.bar} min={0} max={32} unit="px"
+              onChange={v => set({ radii: { ...theme.radii, bar: v } })} />
+          </Row>
+        </div>
       </Section>
 
       {/* ── Windows ─────────────────────────────────────────── */}

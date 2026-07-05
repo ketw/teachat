@@ -142,7 +142,7 @@
   font-size: 12px; font-weight: 800;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  border-radius: var(--border-radius);
+  border-radius: var(--r-panel);
 }
 
 .cw-msg.mine .cw-avatar { background: var(--hw-accent); color: var(--hw-bg); }
@@ -186,7 +186,7 @@
   border: 1px solid var(--border);
   transition: border-color 0.15s;
   flex-shrink: 0;
-  border-radius: var(--border-radius);
+  border-radius: var(--r-panel);
 }
 .cw-input-wrap:focus-within { border-color: var(--hw-fg-30); }
 
@@ -211,3 +211,4 @@
 .cw-send.ready { background: var(--hw-fg); color: var(--hw-bg); border-color: var(--hw-fg); }
 .cw-send.ready:hover { background: var(--hw-accent); border-color: var(--hw-accent); color: var(--hw-bg); }
 .cw-send:disabled { cursor: not-allowed; }
+

@@ -7,7 +7,7 @@
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 12px 60px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2);
-  border-radius: var(--border-radius);
+  border-radius: var(--r-window);
   border: 1px solid transparent;
   isolation: isolate;
   min-height: 120px;
@@ -73,7 +73,7 @@
   transition: opacity 0.1s, background 0.1s;
   line-height: 1;
   font-family: var(--font-mono);
-  border-radius: var(--border-radius);
+  border-radius: var(--r-window);
 }
 
 .fw-close:hover {
@@ -90,3 +90,4 @@
   scrollbar-width: thin;
   scrollbar-color: var(--border-paper) transparent;
 }
+
