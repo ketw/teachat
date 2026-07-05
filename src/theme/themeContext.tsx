@@ -42,36 +42,51 @@ export interface Theme {
 // ── Defaults ─────────────────────────────────────────────────────────────────
 export const DEFAULT_THEME: Theme = {
   bgMode:               'color',
-  bgColor:              '#1c1b22',   // Dusk — deep warm charcoal
+  bgColor:              '#231f20',   // Nordic Hearth — smoky espresso
   bgImage:              '',
   bgImageBlur:          0,
   bgImageOpacity:       0.55,
   bgImageSize:          'cover',
 
-  fgColor:              '#c9c5d3',   // soft lavender-white
-  accentColor:          '#9d8cff',   // muted violet, not electric
-  paperColor:           '#252330',   // panels slightly lighter than bg
+  fgColor:              '#f4f1de',   // alabaster cream
+  accentColor:          '#e07a5f',   // terracotta
+  paperColor:           '#2f2b2c',   // warm charcoal
 
   borderOpacity:        0.22,
   borderRadius:         4,
 
-  frameSize:            12,
-  frameColor:           '',          // sync to bg
+  frameSize:            10,
+  frameColor:           '',
 
   windowTitlebarHeight: 32,
-  windowFocusedBorder:  '',          // auto-derived from accent
-  windowUnfocusedOp:    0.85,
+  windowFocusedBorder:  '',
+  windowUnfocusedOp:    0.88,
 
   barScale:             1,
 
-  noiseOpacity:         0.06,
+  noiseOpacity:         0.07,
 
   fontMono:    'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace',
   fontDisplay: '"Georgia", "Times New Roman", serif',
 };
 
 const PRESETS: Record<string, Partial<Theme>> = {
-  'Dusk': {},  // all defaults — the new clean default
+  'Nordic Hearth': {},  // all defaults — the base theme
+  'Dusk': {
+    bgColor:              '#1c1b22',
+    fgColor:              '#c9c5d3',
+    accentColor:          '#9d8cff',
+    paperColor:           '#252330',
+    borderOpacity:        0.22,
+    borderRadius:         4,
+    frameSize:            12,
+    frameColor:           '',
+    windowTitlebarHeight: 32,
+    windowFocusedBorder:  '',
+    windowUnfocusedOp:    0.85,
+    barScale:             1,
+    noiseOpacity:         0.06,
+  },
   'Ket': {
     bgMode:               'color',
     bgColor:              '#302b3f',
@@ -153,21 +168,6 @@ const PRESETS: Record<string, Partial<Theme>> = {
     barScale:             1,
     noiseOpacity:         0.05,
   },
-  'Nordic Hearth': {
-    bgColor:              '#231f20',
-    fgColor:              '#f4f1de',
-    accentColor:          '#e07a5f',
-    paperColor:           '#2f2b2c',
-    borderOpacity:        0.22,
-    borderRadius:         4,
-    frameSize:            10,
-    frameColor:           '',
-    windowTitlebarHeight: 32,
-    windowFocusedBorder:  '',
-    windowUnfocusedOp:    0.88,
-    barScale:             1,
-    noiseOpacity:         0.07,
-  },
 };
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -213,6 +213,7 @@ function applyTheme(t: Theme) {
 
   r.setProperty('--frame-size',      `${t.frameSize}px`);
   r.setProperty('--frame-color',     effectiveFrame);
+  r.setProperty('--frame-radius',    `${t.borderRadius}px`);
 
   r.setProperty('--win-titlebar-h',  `${t.windowTitlebarHeight}px`);
   // focused border — if empty or not set, derive from accent color

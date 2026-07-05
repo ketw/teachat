@@ -22,11 +22,12 @@
   --border-paper: rgba(0,0,242,0.12);
 
   /* ── Border radius (overridden by theme) ────── */
-  --border-radius: 0px;
+  --border-radius: 4px;
 
   /* ── Frame (overridden by theme) ────────────── */
-  --frame-size:  22px;
-  --frame-color: var(--hw-bg);
+  --frame-size:   10px;
+  --frame-color:  var(--hw-bg);
+  --frame-radius: 4px;
 
   /* ── Window variables (overridden by theme) ─── */
   --win-titlebar-h:    38px;

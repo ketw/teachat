@@ -5,11 +5,12 @@
   overflow: hidden;
 }
 
-/* hw-frame — uses --frame-color so it's themeable */
+/* hw-frame — border + border-radius for rounded frame edges */
 .hw-frame {
   position: fixed;
   inset: 0;
   border: var(--frame-size) solid var(--frame-color, var(--hw-bg));
+  border-radius: var(--frame-radius);
   pointer-events: none;
   z-index: 1000;
   box-shadow: inset 0 0 0 1px var(--border);
