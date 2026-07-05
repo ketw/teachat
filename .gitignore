@@ -15,6 +15,9 @@ dist-ssr
 # Hermes site clone
 .hermes
 
+# Unused assets
+public/img/showcase.webp
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
