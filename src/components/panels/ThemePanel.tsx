@@ -219,12 +219,19 @@ export default function ThemePanel() {
             onChange={v => set({ windowTitlebarHeight: v })} />
         </Row>
         <Row label="Focused Border">
-          <ColorPick value={
-            // extract hex from rgba if possible, otherwise show a placeholder
-            theme.windowFocusedBorder.startsWith('#')
-              ? theme.windowFocusedBorder : '#888888'
-          }
-            onChange={v => set({ windowFocusedBorder: v })} />
+          <ColorPick
+            value={
+              theme.windowFocusedBorder.startsWith('#')
+                ? theme.windowFocusedBorder
+                : theme.accentColor
+            }
+            onChange={v => set({ windowFocusedBorder: v })}
+          />
+          {theme.windowFocusedBorder && (
+            <button className="tp-link hw-mono" onClick={() => set({ windowFocusedBorder: '' })}>
+              ↺ auto
+            </button>
+          )}
         </Row>
         <Row label="Unfocused Opacity">
           <Slider value={Math.round(theme.windowUnfocusedOp * 100)} min={30} max={100} unit="%"

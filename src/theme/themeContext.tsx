@@ -42,36 +42,36 @@ export interface Theme {
 // ── Defaults ─────────────────────────────────────────────────────────────────
 export const DEFAULT_THEME: Theme = {
   bgMode:               'color',
-  bgColor:              '#0000f2',
+  bgColor:              '#1c1b22',   // Dusk — deep warm charcoal
   bgImage:              '',
   bgImageBlur:          0,
   bgImageOpacity:       0.55,
   bgImageSize:          'cover',
 
-  fgColor:              '#f5f5f5',
-  accentColor:          '#edff45',
-  paperColor:           '#ffffff',
+  fgColor:              '#c9c5d3',   // soft lavender-white
+  accentColor:          '#9d8cff',   // muted violet, not electric
+  paperColor:           '#252330',   // panels slightly lighter than bg
 
-  borderOpacity:        0.14,
-  borderRadius:         0,
+  borderOpacity:        0.22,
+  borderRadius:         4,
 
-  frameSize:            22,
-  frameColor:           '',     // empty = same as bgColor
+  frameSize:            12,
+  frameColor:           '',          // sync to bg
 
-  windowTitlebarHeight: 38,
-  windowFocusedBorder:  'rgba(245,245,245,0.35)',
-  windowUnfocusedOp:    1,
+  windowTitlebarHeight: 32,
+  windowFocusedBorder:  '',          // auto-derived from accent
+  windowUnfocusedOp:    0.85,
 
   barScale:             1,
 
-  noiseOpacity:         0.18,
+  noiseOpacity:         0.06,
 
   fontMono:    'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace',
   fontDisplay: '"Georgia", "Times New Roman", serif',
 };
 
 const PRESETS: Record<string, Partial<Theme>> = {
-  'Hermes Blue': {},  // all defaults
+  'Dusk': {},  // all defaults — the new clean default
   'Ket': {
     bgMode:               'color',
     bgColor:              '#302b3f',
@@ -83,10 +83,25 @@ const PRESETS: Record<string, Partial<Theme>> = {
     frameSize:            4,
     frameColor:           '#d2afb4',
     windowTitlebarHeight: 24,
-    windowFocusedBorder:  'rgba(124,106,247,0.5)',
+    windowFocusedBorder:  '',        // auto-derives from accent (#d2afb4)
     windowUnfocusedOp:    1,
     barScale:             1.03,
     noiseOpacity:         0.09,
+  },
+  'Hermes Blue': {
+    bgColor:              '#0000f2',
+    fgColor:              '#f5f5f5',
+    accentColor:          '#edff45',
+    paperColor:           '#ffffff',
+    borderOpacity:        0.14,
+    borderRadius:         0,
+    frameSize:            22,
+    frameColor:           '',
+    windowTitlebarHeight: 38,
+    windowFocusedBorder:  '',
+    windowUnfocusedOp:    1,
+    barScale:             1,
+    noiseOpacity:         0.18,
   },
   'Dark Slate': {
     bgColor: '#0f1117', fgColor: '#e8e8e8', accentColor: '#7c6af7',
@@ -155,7 +170,9 @@ function applyTheme(t: Theme) {
   r.setProperty('--frame-color',     effectiveFrame);
 
   r.setProperty('--win-titlebar-h',  `${t.windowTitlebarHeight}px`);
-  r.setProperty('--win-focus-border',t.windowFocusedBorder);
+  // focused border — if empty or not set, derive from accent color
+  const focusBorder = t.windowFocusedBorder || fgDerived(t.accentColor, 0.7);
+  r.setProperty('--win-focus-border', focusBorder);
   r.setProperty('--win-unfocus-op',  String(t.windowUnfocusedOp));
 
   r.setProperty('--bar-scale',       String(t.barScale));
