@@ -234,15 +234,22 @@ export default function ThemePanel() {
             : 'Set per-element values below'}
         </p>
 
-        <div className={theme.radii.globalEnabled ? 'tp-disabled' : ''}>
-          {/* Frame inner */}
-          <Row label="Frame Inner">
-            <Slider value={theme.radii.frameInner} min={0} max={32} unit="px"
-              onChange={v => set({ radii: { ...theme.radii, frameInner: v } })} />
-          </Row>
+        {/* Frame toggles — ALWAYS interactive, global only affects values not on/off */}
+        <div className="tp-radii-check-row">
+          <label className="tp-check-label hw-mono">
+            <input
+              type="checkbox"
+              className="tp-check"
+              checked={theme.radii.frameInnerEnabled}
+              onChange={e => set({ radii: { ...theme.radii, frameInnerEnabled: e.target.checked } })}
+            />
+            Frame Inner Radius
+          </label>
+          <span className="tp-radii-note hw-mono">
+            {theme.radii.frameInnerEnabled ? 'Inner edge rounded — clips content' : 'Sharp inner corners'}
+          </span>
         </div>
 
-        {/* Frame outer — ALWAYS interactive, even when global override is on */}
         <div className="tp-radii-check-row">
           <label className="tp-check-label hw-mono">
             <input
@@ -251,14 +258,18 @@ export default function ThemePanel() {
               checked={theme.radii.frameOuter}
               onChange={e => set({ radii: { ...theme.radii, frameOuter: e.target.checked } })}
             />
-            Frame Outer Corners
+            Frame Outer Radius
           </label>
           <span className="tp-radii-note hw-mono">
-            {theme.radii.frameOuter ? 'outer = inner + frame size' : 'Sharp outer corners'}
+            {theme.radii.frameOuter ? 'Outer edge rounded — outer = inner + frame size' : 'Sharp outer corners'}
           </span>
         </div>
 
         <div className={theme.radii.globalEnabled ? 'tp-disabled' : ''}>
+          <Row label="Frame Inner Value">
+            <Slider value={theme.radii.frameInner} min={0} max={32} unit="px"
+              onChange={v => set({ radii: { ...theme.radii, frameInner: v } })} />
+          </Row>
           <Row label="Windows">
             <Slider value={theme.radii.windows} min={0} max={32} unit="px"
               onChange={v => set({ radii: { ...theme.radii, windows: v } })} />

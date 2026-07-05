@@ -22,8 +22,9 @@ export interface Theme {
   radii: {
     globalEnabled:    boolean;
     globalValue:      number;
+    frameInnerEnabled: boolean;  // whether inner frame radius is applied
     frameInner:       number;
-    frameOuter:       boolean;
+    frameOuter:       boolean;   // whether outer frame radius is applied
     windows:          number;
     panels:           number;
     buttons:          number;
@@ -68,6 +69,7 @@ export const DEFAULT_THEME: Theme = {
   radii: {
     globalEnabled: false,
     globalValue:   4,
+    frameInnerEnabled: true,
     frameInner:    4,
     frameOuter:    false,
     windows:       4,
@@ -201,7 +203,7 @@ function applyTheme(t: Theme) {
   r.setProperty('--r-button',      `${eff(R.buttons)}px`);
   r.setProperty('--r-input',       `${eff(R.inputs)}px`);
   r.setProperty('--r-bar',         `${eff(R.bar)}px`);
-  r.setProperty('--r-frame-inner', `${eff(R.frameInner)}px`);
+  r.setProperty('--r-frame-inner', `${R.frameInnerEnabled ? eff(R.frameInner) : 0}px`);
   // frameOuter checkbox ALWAYS controls whether outer radius is applied.
   // global override only affects the value used, not the on/off state.
   const outerR = R.frameOuter
