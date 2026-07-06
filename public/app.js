@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════
-   TeaChat — client
+   köfi — client
    ══════════════════════════════════════════════════════════════ */
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -69,7 +69,7 @@ let isTyping = false;
 let lastGroup = null; // { userId, el } for message grouping
 
 // ── Auth ──────────────────────────────────────────────────────────────────
-const savedUser = (() => { try { return JSON.parse(localStorage.getItem('teachat_user')); } catch { return null; } })();
+const savedUser = (() => { try { return JSON.parse(localStorage.getItem('kofi_user')); } catch { return null; } })();
 
 if (savedUser) {
   fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -77,7 +77,7 @@ if (savedUser) {
     .then(r => r.json())
     .then(u => {
       if (u.id) {
-        localStorage.setItem('teachat_user', JSON.stringify({ id: u.id, name: u.name }));
+        localStorage.setItem('kofi_user', JSON.stringify({ id: u.id, name: u.name }));
         enterChat(u);
       } else {
         showLogin();
@@ -106,7 +106,7 @@ async function doLogin() {
       headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
     const data = await res.json();
     if (!res.ok) { $('login-error').textContent = data.error; return; }
-    localStorage.setItem('teachat_user', JSON.stringify({ id: data.id, name: data.name }));
+    localStorage.setItem('kofi_user', JSON.stringify({ id: data.id, name: data.name }));
     enterChat(data);
   } catch { $('login-error').textContent = 'Connection error'; }
 }
@@ -432,7 +432,7 @@ function handleProfileUpdate(profile) {
   profileCache.set(profile.id, profile);
   if (profile.id === me.id) {
     me = profile;
-    localStorage.setItem('teachat_user', JSON.stringify({ id: me.id, name: me.name }));
+    localStorage.setItem('kofi_user', JSON.stringify({ id: me.id, name: me.name }));
     updateMyProfileBtn();
     refreshProfilePanel();
   }
@@ -1179,7 +1179,7 @@ async function saveProfileName() {
     if (!res.ok) { $('pp-name-error').textContent = data.error; return; }
     me = data;
     profileCache.set(me.id, me);
-    localStorage.setItem('teachat_user', JSON.stringify({ id: me.id, name: me.name }));
+    localStorage.setItem('kofi_user', JSON.stringify({ id: me.id, name: me.name }));
     updateMyProfileBtn();
     refreshProfilePanel();
   } catch { $('pp-name-error').textContent = 'Failed to save'; }
@@ -1196,7 +1196,7 @@ async function switchToAlias(alias) {
     if (!res.ok) { $('pp-name-error').textContent = data.error; return; }
     me = data;
     profileCache.set(me.id, me);
-    localStorage.setItem('teachat_user', JSON.stringify({ id: me.id, name: me.name }));
+    localStorage.setItem('kofi_user', JSON.stringify({ id: me.id, name: me.name }));
     updateMyProfileBtn();
     refreshProfilePanel();
     $('pp-name-input').value = me.name;

@@ -1,7 +1,7 @@
 {
-  "name": "teachat",
+  "name": "kofi",
   "version": "1.0.0",
-  "description": "Local network chat app with P2P file sharing",
+  "description": "Local network chat with P2P file sharing",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

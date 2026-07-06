@@ -367,7 +367,7 @@ initDB().then(() => {
   loadFileRegistry();
   server.listen(PORT, '0.0.0.0', () => {
     const interfaces = os.networkInterfaces();
-    console.log('\n☕ TeaChat is running!\n');
+    console.log('\n köfi is running!\n');
     console.log(`   Local:   http://localhost:${PORT}`);
     for (const [, addrs] of Object.entries(interfaces)) {
       for (const addr of addrs) {

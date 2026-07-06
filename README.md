@@ -1,53 +1,31 @@
-# ☕ TeaChat
+# köfi
 
-A minimal local network chat app that runs on your device. Anyone on the same network can access it via your device's IP — similar to how LM Studio serves models locally.
+A minimal local network chat app. Runs on your device — anyone on the same network can connect via your IP, similar to how LM Studio serves models locally.
 
-## ✨ Features
+## Features
 
-- **Local network access** — Share your IP:port and anyone on your network can join
-- **Name-based auth** — Users enter a unique name to chat
-- **Real-time chat** — WebSocket-powered instant messaging
-- **P2P-like file sharing** — Files (images, videos, documents) stay in the uploader's browser sandbox. When someone downloads, the file is streamed from the uploader's browser through the server as a relay. No server-side file storage!
-- **Media previews** — Inline images and videos with lightbox viewer
-- **Typing indicators** — See who's typing in real-time
-- **Persistent history** — All messages stored in SQLite (text + metadata only, files stay in browsers)
+- **Local network** — share your IP:port, anyone on your network can join
+- **Name-based identity** — pick a name, claim it forever. Switch between past names anytime. Names can never be taken by others
+- **Profile photos** — upload an avatar, visible to everyone in real time
+- **P2P file sharing** — files stay in the uploader's browser. Downloads stream directly from their tab with chunked resumable transfer
+- **Resume on reconnect** — if the uploader goes offline mid-transfer, the download pauses and auto-resumes when they return
+- **Media inline** — images preview in-chat, audio plays as a voice note, videos open in a viewer, PDFs open full-screen
+- **Real-time** — WebSocket-powered with typing indicators and live online user blobs
+- **Persistent history** — messages stored in SQLite (text + metadata only, no files on the server)
 
-## 🚀 Quick Start
+## Usage
 
-1. **Install dependencies**
-   ```bash
-   npm install
-   ```
+```bash
+npm install
+npm start
+```
 
-2. **Start the server**
-   ```bash
-   npm start
-   ```
+The terminal prints your local network IP on startup. Share it with anyone on the same network.
 
-3. **Access the chat**
-   - On your device: `http://localhost:3000`
-   - From other devices on the same network: `http://<YOUR_IP>:3000`
+## Tech
 
-   The server will print your network IP on startup.
+Node.js · Express · WebSocket · sql.js (SQLite, pure JS) · Vanilla HTML/CSS/JS
 
-## 📁 File Sharing
+## Notes
 
-- Files are held in the **uploader's browser memory** (via File API)
-- When someone wants to view/download, the request goes through the WebSocket server as a relay
-- The uploader's browser streams chunks to the requester
-- **If the uploader closes their browser, their files become unavailable** (true P2P behavior)
-- No files are stored on the server or in other users' browsers until they explicitly download
-
-## 🛠️ Tech Stack
-
-- **Backend:** Node.js, Express, WebSocket, better-sqlite3
-- **Frontend:** Vanilla HTML/CSS/JavaScript (no frameworks)
-- **Database:** SQLite (messages + users, no file storage)
-
-## 🔒 Security Notes
-
-This is a **local network tool** for trusted environments. Not designed for public internet exposure without additional security layers (authentication, HTTPS, rate limiting, etc.).
-
-## 📝 License
-
-MIT — do whatever you want with it!
+Designed for trusted local networks. Not hardened for public internet exposure.
