@@ -68,37 +68,130 @@ let typingTimer = null;
 let isTyping = false;
 let lastGroup = null; // { userId, el } for message grouping
 
+
 // ── Auth ──────────────────────────────────────────────────────────────────
-// On load: check for a valid session cookie first.
-// If valid → enter chat immediately (no login screen flash).
-// If not → show login.
+// body { visibility:hidden } in CSS. reveal() is called the instant we know
+// which screen to mount — zero flash, nothing pre-rendered in HTML.
 (async () => {
   try {
     const res = await fetch('/api/session');
     if (res.ok) {
-      const profile = await res.json();
-      enterChat(profile);       // skip login screen entirely
+      buildChatScreen();
+      reveal();
+      enterChat(await res.json());
       return;
     }
   } catch {}
-  // No session or network error — show login
-  showLogin();
+  buildLoginScreen();
+  reveal();
 })();
 
-function showLogin(prefillName = '') {
-  $('login-screen').classList.remove('hidden');
-  $('chat-screen').classList.add('hidden');
-  if (prefillName) {
-    $('name-input').value = prefillName;
-    $('password-input').focus();
-  } else {
-    $('name-input').focus();
-  }
+function reveal() { document.body.classList.add('ready'); }
+
+// ── Build login screen ────────────────────────────────────────────────────
+function buildLoginScreen() {
+  const root = $('root');
+  root.innerHTML = '';
+  const screen = mk('div', { id:'login-screen' });
+  const box    = mk('div', { className:'login-box' });
+  const nameIn = mk('input',  { id:'name-input', type:'text', placeholder:'your name', maxLength:32, autocomplete:'off' });
+  nameIn.spellcheck = false;
+  const passIn = mk('input',  { id:'password-input', type:'password', placeholder:'password', maxLength:128, autocomplete:'current-password' });
+  const btn    = mk('button', { id:'join-btn', textContent:'join' });
+  const err    = mk('span',   { id:'login-error', className:'error' });
+  box.append(nameIn, passIn, btn, err);
+  screen.appendChild(box);
+  root.appendChild(screen);
+  btn.addEventListener('click', doLogin);
+  nameIn.addEventListener('keydown', e => { if (e.key === 'Enter') passIn.focus(); });
+  passIn.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  nameIn.focus();
 }
 
-$('join-btn').addEventListener('click', doLogin);
-$('name-input').addEventListener('keydown',     e => { if (e.key === 'Enter') $('password-input').focus(); });
-$('password-input').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+// ── Build chat screen skeleton ────────────────────────────────────────────
+function buildChatScreen() {
+  const root = $('root');
+  root.innerHTML = '';
+  const screen = mk('div', { id:'chat-screen' });
+
+  const profBtn = mk('button', { id:'my-profile-btn', title:'Your profile' });
+  profBtn.setAttribute('aria-label', 'Open profile');
+
+  const panel = mk('div', { id:'profile-panel', className:'hidden' });
+  panel.setAttribute('role', 'dialog');
+  panel.innerHTML = [
+    '<div class="pp-header">',
+      '<span class="pp-title">profile</span>',
+      '<button class="pp-close" id="pp-close-btn" aria-label="Close">✕</button>',
+    '</div>',
+    '<div class="pp-avatar-section">',
+      '<div class="pp-avatar-wrap">',
+        '<div id="pp-avatar-preview" class="pp-avatar-preview"></div>',
+        '<label class="pp-avatar-change" title="Upload photo">',
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square">',
+            '<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>',
+            '<polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+          '</svg>',
+          '<input id="pp-avatar-input" type="file" accept="image/*" hidden />',
+        '</label>',
+      '</div>',
+      '<button id="pp-avatar-remove" class="pp-avatar-remove hidden">remove photo</button>',
+      '<div id="pp-uid" class="pp-uid"></div>',
+    '</div>',
+    '<div class="pp-field-group">',
+      '<label class="pp-label">display name</label>',
+      '<div class="pp-name-row">',
+        '<input id="pp-name-input" type="text" class="pp-input" maxlength="32" spellcheck="false" placeholder="name" />',
+        '<button id="pp-name-save" class="pp-btn-primary">save</button>',
+      '</div>',
+      '<span id="pp-name-error" class="pp-error"></span>',
+    '</div>',
+    '<div class="pp-field-group" id="pp-aliases-group">',
+      '<label class="pp-label">your names <span class="pp-label-sub">— permanently claimed</span></label>',
+      '<div id="pp-aliases-list" class="pp-aliases-list"></div>',
+    '</div>',
+    '<div class="pp-field-group">',
+      '<label class="pp-label">change password</label>',
+      '<input id="pp-cur-pass" type="password" class="pp-input" placeholder="current password" autocomplete="current-password" />',
+      '<input id="pp-new-pass" type="password" class="pp-input" placeholder="new password" autocomplete="new-password" />',
+      '<button id="pp-pass-save" class="pp-btn-primary" style="align-self:flex-start">update</button>',
+      '<span id="pp-pass-error" class="pp-error"></span>',
+    '</div>',
+  ].join('');
+
+  const backdrop = mk('div', { id:'profile-backdrop', className:'hidden' });
+  const messages = mk('div', { id:'messages' });
+
+  const cWrap = mk('div', { id:'composer-wrap' });
+  cWrap.innerHTML = [
+    '<div id="typing-bar"></div>',
+    '<div id="user-blobs"></div>',
+    '<div id="composer">',
+      '<label id="attach-btn" title="Attach file">',
+        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">',
+          '<path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>',
+        '</svg>',
+        '<input id="file-input" type="file" multiple hidden />',
+      '</label>',
+      '<div id="file-previews"></div>',
+      '<textarea id="msg-input" placeholder="message" rows="1"></textarea>',
+      '<button id="send-btn" title="Send (Enter)">',
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">',
+          '<path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>',
+        '</svg>',
+      '</button>',
+    '</div>',
+  ].join('');
+
+  screen.append(profBtn, panel, backdrop, messages, cWrap);
+  root.appendChild(screen);
+}
+
+function mk(tag, props) {
+  const e = document.createElement(tag);
+  if (props) for (const [k, v] of Object.entries(props)) e[k] = v;
+  return e;
+}
 
 async function doLogin() {
   const name     = $('name-input').value.trim();
@@ -107,36 +200,30 @@ async function doLogin() {
   if (!password) { $('login-error').textContent = 'Password required'; return; }
   $('login-error').textContent = '';
   try {
-    const res  = await fetch('/api/auth', { method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const res  = await fetch('/api/auth', { method:'POST',
+      headers:{ 'Content-Type':'application/json' },
       body: JSON.stringify({ name, password }) });
     const data = await res.json();
     if (!res.ok) { $('login-error').textContent = data.error; return; }
-    $('password-input').value = ''; // don't hold the password in DOM
+    buildChatScreen();
     enterChat(data);
   } catch { $('login-error').textContent = 'Connection error'; }
 }
 
 // ── Enter chat ────────────────────────────────────────────────────────────
 async function enterChat(user) {
-  me = user; // { id, name, avatar, aliases[] }
+  me = user;
   profileCache.set(me.id, me);
-
-  $('login-screen').classList.add('hidden');
-  $('chat-screen').classList.remove('hidden');
-
   updateMyProfileBtn();
   initProfilePanel();
-
-  try {
-    const res = await fetch('/api/messages');
-    const msgs = await res.json();
-    for (const m of msgs) renderMessage(m, false);
-    forceScrollBottom();
-  } catch {}
-
+  wireComposer();
+  fetch('/api/messages')
+    .then(r => r.json())
+    .then(msgs => { for (const m of msgs) renderMessage(m, false); forceScrollBottom(); })
+    .catch(() => {});
   connectWS();
 }
+
 
 // ── WebSocket ─────────────────────────────────────────────────────────────
 function connectWS() {

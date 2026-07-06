@@ -24,3 +24,5 @@ desktop.ini
 .idea/
 *.swp
 *.swo
+*.bak
+*.orig
