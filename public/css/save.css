@@ -1,48 +1,100 @@
-/* ── Save-in-chat indicator ───────────────────────────────────── */
+/* ── Save-in-chat ─────────────────────────────────────────────── */
 
-/* Bar below a file bubble showing who has it saved */
+/* The save indicator is hidden by default — only shown when saved */
 .save-indicator {
+  display: none;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.6rem 0.3rem 0.5rem;
+  font-size: 0.7rem;
+  color: var(--accent);
+  user-select: none;
+  cursor: default;
+  background: rgba(224, 122, 95, 0.1);
+  border-left: 2px solid var(--accent);
+  margin-top: 0.2rem;
+  transition: opacity 0.15s;
+}
+
+/* Only show when the file has savers */
+.save-indicator.has-savers {
+  display: flex;
+}
+
+/* Saver blobs row */
+.save-savers {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.2rem 0.5rem;
-  font-size: 0.68rem;
-  color: var(--muted);
-  cursor: default;
-  user-select: none;
-  min-height: 1.4rem;
-  transition: color 0.12s;
-}
-
-.save-indicator.has-savers {
-  color: var(--accent);
-}
-
-.save-icon {
-  font-size: 0.75rem;
-  line-height: 1;
+  gap: 3px;
   flex-shrink: 0;
 }
 
-.save-label {
+.save-saver-blob {
+  width: 16px;
+  height: 16px;
+  border-radius: 0;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  flex-shrink: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 200px;
 }
 
-/* Saving in progress */
+.save-saver-blob img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* "saved in chat" text label */
+.save-label {
+  font-size: 0.68rem;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Saving in progress — show but muted */
 .save-indicator[data-status="saving"] {
+  display: flex;
+  background: rgba(159, 150, 148, 0.08);
+  border-left-color: var(--muted);
+  color: var(--muted);
+}
+.save-indicator[data-status="saving"] .save-label {
   color: var(--muted);
   font-style: italic;
+  font-weight: 400;
 }
 
 /* Error state */
 .save-indicator[data-status="error"] {
+  display: flex;
+  background: rgba(192, 57, 43, 0.1);
+  border-left-color: var(--danger);
   color: var(--danger);
 }
+.save-indicator[data-status="error"] .save-label {
+  color: var(--danger);
+  font-weight: 400;
+}
 
-/* ── Saved-file bubble (always available from server) ────────── */
+/* msg-wrapper gets a visible left accent when its file is saved */
+.msg-wrapper.is-saved {
+  border-left: 2px solid rgba(224, 122, 95, 0.5);
+  padding-left: 0.4rem;
+}
+
+/* ── Saved-file bubble (served directly from server) ─────────── */
 .saved-file-wrapper {
   display: inline-flex;
   flex-direction: column;
@@ -51,16 +103,9 @@
 
 .saved-file-bubble {
   border-color: var(--accent) !important;
-  background: rgba(224, 122, 95, 0.06) !important;
+  background: rgba(224, 122, 95, 0.08) !important;
 }
 
 .saved-file-bubble .file-action {
   color: var(--accent);
-}
-
-/* Small "saved" badge on the file icon area */
-.saved-file-bubble .file-icon::after {
-  content: ' 🔖';
-  font-size: 0.7rem;
-  vertical-align: super;
 }

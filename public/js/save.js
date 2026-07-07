@@ -139,63 +139,102 @@ async function unsaveFile(fileId, wrapper) {
   } catch { showSaveError(wrapper, 'Network error'); }
 }
 
-// ── Build save indicator bar (attached to file bubble wrappers) ────────────
+// ── Build save indicator bar (attached to msg-wrapper via appendBubble) ───
 function buildSaveIndicator(wrapper, fileId) {
   const existing = wrapper.querySelector('.save-indicator');
   if (existing) return existing;
 
-  const bar = mk('div', { className:'save-indicator' });
+  const bar     = mk('div', { className:'save-indicator' });
   bar.dataset.fileId = fileId;
-  bar.title = 'Double-click to save in chat';
 
-  const icon  = mk('span', { className:'save-icon', textContent:'🔖' });
-  const label = mk('span', { className:'save-label' });
-  bar.append(icon, label);
+  const savers  = mk('div', { className:'save-savers' });
+  const label   = mk('span', { className:'save-label' });
+  bar.append(savers, label);
   wrapper.appendChild(bar);
 
   // Populate immediately if we already have savers
-  const savers = fileSavers.get(fileId) || [];
-  refreshSaveLabel(label, savers);
+  refreshSaveIndicator(bar, fileSavers.get(fileId) || []);
   return bar;
 }
 
 function updateSaveIndicator(fileId, savers) {
-  // Update every wrapper with this fileId in the DOM
-  document.querySelectorAll(`[data-file-id="${fileId}"] .save-label`).forEach(label => {
-    refreshSaveLabel(label, savers);
-  });
-  // Also update saved-file bubbles (which have data-saved-file-id)
-  document.querySelectorAll(`[data-saved-file-id="${fileId}"] .save-label`).forEach(label => {
-    refreshSaveLabel(label, savers);
+  // Find every msg-wrapper that contains this fileId's content
+  // The save-indicator is a direct child of the msg-wrapper
+  document.querySelectorAll(`.save-indicator[data-file-id="${fileId}"]`).forEach(bar => {
+    refreshSaveIndicator(bar, savers);
+    // Toggle is-saved on the parent msg-wrapper
+    const msgWrapper = bar.closest('.msg-wrapper');
+    if (msgWrapper) msgWrapper.classList.toggle('is-saved', savers.length > 0);
   });
 }
 
-function refreshSaveLabel(label, savers) {
+function refreshSaveIndicator(bar, savers) {
+  const saversEl = bar.querySelector('.save-savers');
+  const label    = bar.querySelector('.save-label');
+
   if (!savers || savers.length === 0) {
-    label.textContent = '';
-    label.closest('.save-indicator').classList.remove('has-savers');
+    bar.classList.remove('has-savers');
+    bar.dataset.status = '';
+    saversEl.innerHTML = '';
+    label.textContent  = '';
     return;
   }
-  label.closest('.save-indicator').classList.add('has-savers');
-  const mine = savers.some(s => s.id === me.id);
+
+  bar.classList.add('has-savers');
+
+  // Rebuild saver blobs (max 5 shown)
+  saversEl.innerHTML = '';
+  const shown = savers.slice(0, 5);
+  for (const s of shown) {
+    const blob = mk('div', { className:'save-saver-blob' });
+    const profile = profileCache.get(s.id);
+    if (profile?.avatar) {
+      const img = mk('img');
+      img.src = profile.avatar;
+      blob.appendChild(img);
+    } else {
+      blob.textContent = s.name.charAt(0);
+    }
+    blob.title = s.name;
+    saversEl.appendChild(blob);
+  }
+  if (savers.length > 5) {
+    saversEl.appendChild(mk('div', { className:'save-saver-blob', textContent:'+' + (savers.length - 5) }));
+  }
+
+  // Label: "saved in chat" or "you saved" etc.
+  const mine   = savers.some(s => s.id === me.id);
   const others = savers.filter(s => s.id !== me.id);
-  const names = [mine ? 'you' : null, ...others.map(s => s.name)].filter(Boolean);
-  label.textContent = names.length === 1 ? names[0] : `${names[0]} +${names.length - 1}`;
+  if (mine && others.length === 0) {
+    label.textContent = 'saved in chat by you';
+  } else if (mine) {
+    label.textContent = `saved by you + ${others.length} other${others.length > 1 ? 's' : ''}`;
+  } else if (savers.length === 1) {
+    label.textContent = `saved by ${savers[0].name}`;
+  } else {
+    label.textContent = `saved by ${savers[0].name} + ${savers.length - 1} other${savers.length > 1 ? 's' : ''}`;
+  }
 }
 
 function showSaveStatus(wrapper, msg) {
   const bar = wrapper.querySelector('.save-indicator');
-  if (bar) { bar.dataset.status = 'saving'; bar.querySelector('.save-label').textContent = msg; }
+  if (!bar) return;
+  bar.dataset.status = 'saving';
+  bar.classList.add('has-savers'); // make it visible
+  const label = bar.querySelector('.save-label');
+  if (label) label.textContent = msg;
 }
 
 function showSaveError(wrapper, msg) {
   const bar = wrapper.querySelector('.save-indicator');
   if (!bar) return;
   bar.dataset.status = 'error';
-  bar.querySelector('.save-label').textContent = msg;
+  bar.classList.add('has-savers'); // make it visible
+  const label = bar.querySelector('.save-label');
+  if (label) label.textContent = msg;
   setTimeout(() => {
     bar.dataset.status = '';
-    updateSaveIndicator(bar.dataset.fileId, fileSavers.get(bar.dataset.fileId) || []);
+    refreshSaveIndicator(bar, fileSavers.get(bar.dataset.fileId) || []);
   }, 3000);
 }
 
