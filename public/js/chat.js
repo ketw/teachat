@@ -225,6 +225,7 @@ function appendBubble(group, m, isMe) {
     const mime = meta.mimeType || '';
 
     if (isMe && hostedFiles.has(meta.fileId)) {
+      // File is in memory — instant inline preview
       const url = URL.createObjectURL(hostedFiles.get(meta.fileId));
       if (mime.startsWith('image/')) {
         const img = mk('img', { className:'img-preview', alt:meta.name, src:url });
@@ -238,6 +239,7 @@ function appendBubble(group, m, isMe) {
         buildFileBubble(body, m, isMe, meta);
       }
     } else {
+      // Either not the uploader, or uploader reloaded and lost the in-memory file
       buildFileBubble(body, m, isMe, meta);
     }
   }

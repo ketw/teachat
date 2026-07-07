@@ -164,20 +164,27 @@ function buildFileBubble(container, m, isMe, meta) {
   container.appendChild(wrapper);
 
   if (isMe) {
-    faction.textContent = 'Click to open';
-    bubble.style.cursor = 'pointer';
-    bubble.addEventListener('click', () => {
-      const file = hostedFiles.get(fileId);
-      if (!file) return;
-      const url  = URL.createObjectURL(file);
-      const mime = meta.mimeType || '';
-      const kind = mime.split('/')[0];
-      if (kind === 'image') openMediaViewer(url, 'image', meta.name);
-      else if (kind === 'video') openMediaViewer(url, 'video', meta.name);
-      else if (kind === 'audio') openMediaViewer(url, 'audio', meta.name);
-      else if (mime.includes('pdf')) openPdfViewer(url, meta.name);
-      else triggerDownload(url, meta.name);
-    });
+    const file = hostedFiles.get(fileId);
+    if (file) {
+      // File in memory (same session) — open directly, instant, no network needed
+      faction.textContent = clickLabel(kind, isPdf);
+      bubble.style.cursor = 'pointer';
+      bubble.addEventListener('click', () => {
+        const url = URL.createObjectURL(file);
+        if (kind === 'image') openMediaViewer(url, 'image', meta.name);
+        else if (kind === 'video') openMediaViewer(url, 'video', meta.name);
+        else if (kind === 'audio') openMediaViewer(url, 'audio', meta.name);
+        else if (isPdf) openPdfViewer(url, meta.name);
+        else triggerDownload(url, meta.name);
+      });
+      return;
+    }
+    // After a page reload the in-memory file is gone — can't serve or download it.
+    // Show a clear message rather than silently doing nothing.
+    faction.textContent = 'Reload lost the file — re-send to share again';
+    faction.style.color = 'var(--muted)';
+    bubble.style.cursor = 'default';
+    bubble.title = 'The file is only held in your browser tab. Re-uploading will make it available again.';
     return;
   }
 
