@@ -638,11 +638,53 @@ wss.on('connection', (ws) => {
 });
 
 // ── Start ──────────────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || config.PORT || 3000;
 
-initDB().then(() => {
+// Path where we cache the last-known public IP so we can detect changes
+const IP_CACHE_PATH = path.join(__dirname, '.last_public_ip');
+
+async function getPublicIp() {
+  // Try a few lightweight services in order
+  const services = [
+    'https://api.ipify.org',
+    'https://icanhazip.com',
+    'https://checkip.amazonaws.com',
+  ];
+  for (const url of services) {
+    try {
+      const { https } = require('https');
+      const ip = await new Promise((resolve, reject) => {
+        require('https').get(url, res => {
+          let d = '';
+          res.on('data', c => d += c);
+          res.on('end', () => resolve(d.trim()));
+        }).on('error', reject);
+      });
+      if (/^\d+\.\d+\.\d+\.\d+$/.test(ip)) return ip;
+    } catch {}
+  }
+  return null;
+}
+
+async function updateDdns(publicIp) {
+  if (!config.FREEDNS_UPDATE_URL) return;
+  try {
+    await new Promise((resolve, reject) => {
+      require('https').get(config.FREEDNS_UPDATE_URL, res => {
+        let d = '';
+        res.on('data', c => d += c);
+        res.on('end', () => resolve(d.trim()));
+      }).on('error', reject);
+    });
+    console.log(`   DDNS:    updated ${config.DOMAIN} → ${publicIp}`);
+  } catch (e) {
+    console.log(`   DDNS:    update failed — ${e.message}`);
+  }
+}
+
+initDB().then(async () => {
   loadFileRegistry();
-  server.listen(PORT, '0.0.0.0', () => {
+  server.listen(PORT, '0.0.0.0', async () => {
     const ifaces = os.networkInterfaces();
     console.log('\n köfi is running!\n');
     console.log(`   Local:   http://localhost:${PORT}`);
@@ -650,6 +692,31 @@ initDB().then(() => {
       for (const a of addrs)
         if (a.family === 'IPv4' && !a.internal)
           console.log(`   Network: http://${a.address}:${PORT}`);
+    if (config.DOMAIN)
+      console.log(`   Domain:  ${config.DOMAIN}`);
     console.log('');
+
+    // ── Public IP check & DDNS update ─────────────────────────────────────
+    const publicIp = await getPublicIp();
+    if (publicIp) {
+      const lastIp = fs.existsSync(IP_CACHE_PATH)
+        ? fs.readFileSync(IP_CACHE_PATH, 'utf8').trim()
+        : null;
+
+      if (publicIp !== lastIp) {
+        console.log(`\n ⚠  Public IP changed: ${lastIp || 'unknown'} → ${publicIp}`);
+        if (config.FREEDNS_UPDATE_URL) {
+          await updateDdns(publicIp);
+        } else {
+          console.log(`    Update ${config.DOMAIN || 'your DNS'} A record → ${publicIp}`);
+          console.log(`    Then set FREEDNS_UPDATE_URL in config.js to automate this.\n`);
+        }
+        fs.writeFileSync(IP_CACHE_PATH, publicIp);
+      } else {
+        console.log(`   Public IP: ${publicIp} (unchanged)\n`);
+      }
+    } else {
+      console.log('   Public IP: could not determine (no internet?)\n');
+    }
   });
 }).catch(err => { console.error('Failed to init DB:', err); process.exit(1); });
