@@ -1,99 +1,83 @@
-/* ══════════════════════════════════════════════════════════════
-   tunnel.js — production launcher
-   Starts köfi + a Cloudflare Tunnel so kofi.404.mn works
-   without port forwarding or a static IP.
+/* ── tunnel.js — personal hosting launcher ───────────────────────────────────
+   Boots the köfi server locally and punches it out to the internet via a
+   Cloudflare quick-tunnel (trycloudflare.com). No account, no token, no
+   port-forwarding required.
 
    Usage:
-     node tunnel.js                   ← uses named tunnel from TUNNEL_TOKEN env
-     TUNNEL_TOKEN=xxx node tunnel.js  ← same, explicit
+     node tunnel.js            ← picks up PORT from env or defaults to 3000
+     PORT=8080 node tunnel.js
 
-   The TUNNEL_TOKEN env var comes from your Cloudflare dashboard.
-   See README-DEPLOY.md for the one-time setup steps.
-══════════════════════════════════════════════════════════════ */
+   The printed URL is live for as long as this process is running.
+   Share it with friends — closing the terminal ends the session.
+──────────────────────────────────────────────────────────────────────────── */
 
-const { spawn }   = require('child_process');
+const { spawn }        = require('child_process');
 const { install, bin } = require('cloudflared');
-const path        = require('path');
 
-const TUNNEL_TOKEN = process.env.TUNNEL_TOKEN;
-const PORT         = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-// ── 1. Ensure cloudflared binary is present ────────────────────
+// ── Step 1: ensure the cloudflared binary is present ─────────────────────
 async function ensureCloudflared() {
   try {
     await install(bin);
-    console.log('  cloudflared binary ready');
-  } catch (e) {
-    // Already installed or install skipped — fine
+  } catch {
+    // Already installed, or install not needed — fine either way
   }
 }
 
-// ── 2. Start the köfi server ───────────────────────────────────
+// ── Step 2: start the köfi server as a child process ─────────────────────
 function startServer() {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const srv = spawn('node', ['server.js'], {
       stdio: 'inherit',
-      env: { ...process.env },
+      env: { ...process.env, PORT: String(PORT) },
     });
 
     srv.on('error', err => {
-      console.error('[server] failed to start:', err.message);
-      process.exit(1);
+      console.error('[köfi] server failed to start:', err.message);
+      reject(err);
     });
 
-    // Give the server a moment to bind before starting the tunnel
-    setTimeout(resolve, 2000);
-    console.log(`  köfi server starting on port ${PORT}…`);
+    // Give the server enough time to bind before the tunnel tries to connect
+    setTimeout(resolve, 1500);
   });
 }
 
-// ── 3. Start the Cloudflare Tunnel ────────────────────────────
+// ── Step 3: open a Cloudflare quick-tunnel pointing at the local server ───
 function startTunnel() {
-  if (!TUNNEL_TOKEN) {
-    // No token — quick-tunnel mode (URL changes on restart, fine for testing)
-    console.log('\n  No TUNNEL_TOKEN set — starting quick tunnel (URL changes on restart)');
-    console.log('  For a permanent URL at kofi.404.mn, follow README-DEPLOY.md\n');
-
-    const tun = spawn(bin, [
-      'tunnel', '--url', `http://localhost:${PORT}`,
-    ], { stdio: ['ignore', 'pipe', 'pipe'] });
-
-    tun.stdout.on('data', d => {
-      const s = d.toString();
-      const m = s.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
-      if (m) console.log(`\n  🌐 Public URL: ${m[0]}\n`);
+  return new Promise((resolve) => {
+    const tun = spawn(bin, ['tunnel', '--url', `http://localhost:${PORT}`], {
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
-    tun.stderr.on('data', d => {
-      const s = d.toString();
-      const m = s.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
-      if (m) console.log(`\n  🌐 Public URL: ${m[0]}\n`);
-    });
+
+    // The public URL appears on stderr; also check stdout just in case
+    const onData = (data) => {
+      const line = data.toString();
+      const match = line.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
+      if (match) {
+        console.log('\n  köfi is live\n');
+        console.log(`  Share this link:  ${match[0]}\n`);
+        console.log('  The link works as long as this window stays open.\n');
+        resolve(match[0]);
+      }
+    };
+
+    tun.stdout.on('data', onData);
+    tun.stderr.on('data', onData);
 
     tun.on('close', code => {
-      if (code !== 0) console.error('[tunnel] exited with code', code);
+      if (code !== 0) {
+        console.error(`[tunnel] exited with code ${code}`);
+      }
     });
-    return;
-  }
-
-  // Named tunnel mode — permanent URL, tied to your domain
-  console.log('  Starting named Cloudflare Tunnel…');
-  const tun = spawn(bin, [
-    'tunnel', 'run', '--token', TUNNEL_TOKEN,
-  ], { stdio: 'inherit' });
-
-  tun.on('error', err => console.error('[tunnel] error:', err.message));
-  tun.on('close', code => {
-    if (code !== 0) {
-      console.error('[tunnel] exited with code', code, '— restarting in 5s');
-      setTimeout(startTunnel, 5000);
-    }
   });
 }
 
-// ── Boot ───────────────────────────────────────────────────────
+// ── Boot ──────────────────────────────────────────────────────────────────
 (async () => {
-  console.log('\n  köfi production launcher\n');
+  console.log('\n  starting köfi...\n');
+
   await ensureCloudflared();
   await startServer();
-  startTunnel();
+  await startTunnel();
 })();
