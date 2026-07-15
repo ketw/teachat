@@ -28,7 +28,7 @@ async function ensureCloudflared() {
 // ── Step 2: start the köfi server as a child process ─────────────────────
 function startServer() {
   return new Promise((resolve, reject) => {
-    const srv = spawn('node', ['server.js'], {
+    const srv = spawn('node', ['serve.js'], {
       stdio: 'inherit',
       env: { ...process.env, PORT: String(PORT) },
     });

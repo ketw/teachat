@@ -1,16 +1,17 @@
 /* ── server.js — köfi API server ─────────────────────────────────────────────
-   Pure production server. Exposes REST + WebSocket endpoints.
-   Does not serve any UI — a hosting platform (Render, Railway, Fly, etc.)
-   or a separate frontend handles that.
+   Pure API server. Exposes REST + WebSocket endpoints only.
+   Does not serve any UI or static files — that is handled externally
+   by serve.js (or any other hook that imports this module).
 
-   Start:  node server.js
-   Port:   process.env.PORT  (required on most hosting platforms)
-           falls back to config.PORT, then 3000 for local dev.
+   Run directly:   node server.js          ← API only, no UI
+   Run with UI:    node serve.js           ← API + public folder
+   Run via tunnel: node tunnel.js          ← API + public folder + Cloudflare URL
+
+   Port: process.env.PORT → config.PORT → 3000
 ──────────────────────────────────────────────────────────────────────────── */
 
 const express = require('express');
 const http    = require('http');
-const path    = require('path');
 const config  = require('./config');
 
 const { initDB }                               = require('./src/db');
@@ -28,12 +29,6 @@ app.use(express.json({ limit: '4mb' }));
 // Raw body parser for file save uploads (bypasses the JSON size limit)
 app.use('/api/save', express.raw({ type: '*/*', limit: config.SAVE_SIZE_LIMIT_BYTES + 1024 }));
 
-// ── Static files (UI) ──────────────────────────────────────────────────────
-// Served here so the server is self-contained when needed (e.g. tunnel mode).
-// On a dedicated hosting platform you can offload this to a CDN/edge layer,
-// but keeping it here costs nothing and keeps deployment simple.
-app.use(express.static(path.join(__dirname, 'public')));
-
 // ── API routes ─────────────────────────────────────────────────────────────
 registerAuthRoutes(app);
 registerProfileRoutes(app, broadcastAll, clients);
@@ -42,17 +37,25 @@ registerFileRoutes(app, broadcastAll);
 // ── WebSocket ──────────────────────────────────────────────────────────────
 attachWS(server);
 
-// ── Start ──────────────────────────────────────────────────────────────────
+// ── Start function — called by this file or by an external hook ───────────
 const PORT = process.env.PORT || config.PORT || 3000;
 
-initDB()
-  .then(() => {
-    loadFileRegistry();
-    server.listen(PORT, '0.0.0.0', () => {
-      console.log(`köfi listening on port ${PORT}`);
-    });
-  })
-  .catch(err => {
-    console.error('Failed to init DB:', err);
+async function start() {
+  await initDB();
+  loadFileRegistry();
+  await new Promise((resolve, reject) =>
+    server.listen(PORT, '0.0.0.0', (err) => err ? reject(err) : resolve())
+  );
+  console.log(`köfi api listening on port ${PORT}`);
+}
+
+// ── Exports — let other files hook into app/server before or after start ──
+module.exports = { app, server, start, PORT };
+
+// ── Boot when run directly ─────────────────────────────────────────────────
+if (require.main === module) {
+  start().catch(err => {
+    console.error('Failed to start:', err);
     process.exit(1);
   });
+}
